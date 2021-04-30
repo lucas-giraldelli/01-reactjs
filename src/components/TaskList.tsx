@@ -14,16 +14,52 @@ export function TaskList() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskTitle, setNewTaskTitle] = useState('');
 
+  function getNewRandomId(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function getUniqueId(): number {
+    let newId = getNewRandomId(0, 500);
+
+    if (tasks.find(task => task.id === newId)) {
+      return getUniqueId();
+    } else {
+      return newId;
+    }
+  }
+
   function handleCreateNewTask() {
-    // Crie uma nova task com um id random, não permita criar caso o título seja vazio.
+    if (newTaskTitle) {
+      const newTask = {
+        id: getUniqueId(),
+        title: newTaskTitle,
+        isComplete: false
+      }
+
+      setTasks([...tasks, newTask]);
+    }
   }
 
   function handleToggleTaskCompletion(id: number) {
-    // Altere entre `true` ou `false` o campo `isComplete` de uma task com dado ID
+    const taskIndex = tasks.findIndex(task => task.id === id);
+
+    let allTasks = [...tasks];
+
+    let task = { ...allTasks[taskIndex] }
+
+    task.isComplete = !task.isComplete;
+
+    allTasks[taskIndex] = task;
+
+    setTasks(allTasks);
   }
 
   function handleRemoveTask(id: number) {
-    // Remova uma task da listagem pelo ID
+    const taskIndex = tasks.findIndex(task => task.id === id);
+
+    const remaningTasks = tasks.filter((_, index) => index !== taskIndex );
+
+    setTasks(remaningTasks);
   }
 
   return (
@@ -32,7 +68,7 @@ export function TaskList() {
         <h2>Minhas tasks</h2>
 
         <div className="input-group">
-          <input 
+          <input
             type="text" 
             placeholder="Adicionar novo todo" 
             onChange={(e) => setNewTaskTitle(e.target.value)}
